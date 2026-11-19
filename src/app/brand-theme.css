@@ -1,0 +1,83 @@
+/* @polsia:user-owned — Dayweft's shared light brand for the landing and future app. */
+:root,
+.dark {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --foreground: #17243a;
+  --card: #f2f6fd;
+  --card-foreground: #1c2a41;
+  --popover: #ffffff;
+  --popover-foreground: #17243a;
+  --primary: #155eef;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf1ff;
+  --secondary-foreground: #18365f;
+  --muted: #eff3f9;
+  --muted-foreground: #4b5e78;
+  --accent: #e7f0ff;
+  --accent-foreground: #173b78;
+  --destructive: #b42318;
+  --border: #d8e2f0;
+  --input: #c9d6e8;
+  --ring: #155eef;
+
+  --brand-50: #f1f6ff;
+  --brand-100: #e3edff;
+  --brand-200: #c8dcff;
+  --brand-300: #a4c3ff;
+  --brand-400: #78a4ff;
+  --brand-500: #397af5;
+  --brand-600: #155eef;
+  --brand-700: #174bc0;
+  --brand-800: #193d91;
+  --brand-900: #193366;
+
+  --elevation-1: rgb(31 74 137 / 8%);
+  --elevation-2: rgb(31 74 137 / 12%);
+  --elevation-3: rgb(31 74 137 / 18%);
+  --shadow-brand-color: rgb(21 94 239 / 18%);
+  --dayweft-evergreen: #155a49;
+  --dayweft-evergreen-soft: #e9f4ef;
+  --dayweft-blue-soft: #edf4ff;
+
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-albert-sans), ui-sans-serif, system-ui, sans-serif;
+  --text-display: 3.25rem;
+  --text-display--line-height: 1.04;
+  --text-display--font-weight: 700;
+  --text-display--letter-spacing: -0.04em;
+  --text-h1: 2.75rem;
+  --text-h1--line-height: 1.1;
+  --text-h1--font-weight: 700;
+  --text-h1--letter-spacing: -0.035em;
+  --text-h2: 2.125rem;
+  --text-h2--line-height: 1.16;
+  --text-h2--font-weight: 650;
+  --text-h3: 1.625rem;
+  --text-h3--line-height: 1.24;
+  --text-h3--font-weight: 650;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.65;
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+
+  --radius: 1rem;
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --spacing-gutter: clamp(1.25rem, 5vw, 2.5rem);
+  --spacing-section: clamp(4rem, 8vw, 7rem);
+  --spacing-section-lg: clamp(5rem, 10vw, 9rem);
+  --container-page: 74rem;
+}
+
+:root {
+  color-scheme: light !important;
+}
