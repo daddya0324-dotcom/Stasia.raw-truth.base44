@@ -1,0 +1,998 @@
+/* @polsia:user-owned — local art direction for Dayweft's public home. */
+.page {
+  min-height: 100vh;
+  overflow-x: clip;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-body);
+}
+
+.container {
+  width: min(100% - 3rem, 74rem);
+  margin-inline: auto;
+}
+
+.header {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+
+.headerInner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 2rem);
+  width: min(100% - 3rem, 78rem);
+  min-height: 76px;
+  margin-inline: auto;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: 1.16rem;
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  text-decoration: none;
+}
+
+.mark {
+  width: 2rem;
+  height: 2rem;
+  color: var(--primary);
+  flex: 0 0 auto;
+}
+
+.nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(1rem, 2.4vw, 2.25rem);
+  min-width: 0;
+}
+
+.nav a,
+.footerInner > a {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.nav a:hover,
+.footerInner > a:hover,
+.emailLink:hover {
+  color: var(--primary);
+}
+
+.headerCta,
+.primaryCta,
+.offerCta,
+.trialCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 2.875rem;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  padding: 0.72rem 1.15rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 7px 16px -10px var(--shadow-brand-color);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.headerCta:hover,
+.primaryCta:hover,
+.offerCta:hover,
+.trialCta:hover {
+  border-color: var(--brand-700);
+  background: var(--brand-700);
+  color: var(--primary-foreground);
+  box-shadow: 0 10px 22px -12px var(--shadow-brand-color);
+  transform: translateY(-1px);
+}
+
+.headerCta:focus-visible,
+.primaryCta:focus-visible,
+.offerCta:focus-visible,
+.trialCta:focus-visible,
+.nav a:focus-visible,
+.textLink:focus-visible,
+.emailLink:focus-visible,
+.footerInner > a:focus-visible,
+.wordmark:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 4px;
+}
+
+.hero {
+  position: relative;
+  background: var(--background);
+}
+
+.heroField {
+  width: 100%;
+  background: var(--background);
+}
+
+.heroFieldContent {
+  width: 100%;
+  padding-block: clamp(3.25rem, 7.5vw, 7.2rem) clamp(4rem, 8vw, 7rem);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  align-items: center;
+  gap: clamp(2.5rem, 5.5vw, 5.8rem);
+}
+
+.heroCopy {
+  max-width: 42rem;
+}
+
+.eyebrow,
+.sectionEyebrow,
+.offerEyebrow,
+.trialEyebrow {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.095em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.47rem 0.74rem;
+  background: var(--background);
+  color: var(--secondary-foreground);
+  letter-spacing: 0.015em;
+  text-transform: none;
+}
+
+.eyebrowDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--dayweft-evergreen);
+  box-shadow: 0 0 0 3px var(--dayweft-evergreen-soft);
+}
+
+.heroCopy h1 {
+  max-width: 12ch;
+  margin: 1.35rem 0 1.2rem;
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: clamp(3.05rem, 5.25vw, 5.15rem);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  line-height: 0.99;
+}
+
+.heroText {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem 1.4rem;
+  margin-top: 1.9rem;
+}
+
+.primaryCta {
+  min-height: 3.25rem;
+  padding-inline: 1.35rem;
+  font-size: 0.94rem;
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--secondary-foreground);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.25rem;
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+
+.textLink:hover {
+  color: var(--primary);
+  text-decoration-color: currentColor;
+}
+
+.mailNote {
+  margin: 0.9rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.heroVisual {
+  min-width: 0;
+}
+
+.vignette {
+  position: relative;
+  width: min(100%, 34rem);
+  margin-inline: auto;
+  border: 1px solid var(--border);
+  border-radius: 1.85rem;
+  padding: clamp(1.2rem, 3vw, 2rem);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 28px 76px -50px rgb(36 70 126 / 35%);
+}
+
+.vignetteTop {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.vignetteMark,
+.footCheck {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.8rem;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.vignetteTop p {
+  margin: 0;
+  color: var(--card-foreground);
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.25vw, 1.08rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.vignetteDate {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.32rem 0.48rem;
+  background: var(--background);
+  color: var(--muted-foreground);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.vignetteNotes {
+  display: grid;
+  gap: 0.65rem;
+  padding-block: 1.2rem;
+}
+
+.note {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  column-gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 1.05rem;
+  padding: 0.85rem 0.95rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.noteLabel {
+  grid-column: 1 / -1;
+  margin-bottom: 0.28rem;
+  color: var(--muted-foreground);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.note p {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.42;
+}
+
+.note svg {
+  margin-top: 0.1rem;
+  color: var(--primary);
+}
+
+.planNote {
+  margin-left: 1.2rem;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.planNote .noteLabel,
+.planNote p {
+  color: var(--secondary-foreground);
+}
+
+.taskNote {
+  margin-right: 1.2rem;
+  background: var(--dayweft-evergreen-soft);
+  color: var(--dayweft-evergreen);
+}
+
+.taskNote .noteLabel,
+.taskNote p,
+.taskNote svg {
+  color: var(--dayweft-evergreen);
+}
+
+.vignetteFoot {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  color: var(--foreground);
+}
+
+.footCheck {
+  background: var(--dayweft-evergreen-soft);
+  color: var(--dayweft-evergreen);
+}
+
+.footLabel {
+  color: var(--muted-foreground);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.vignetteFoot p {
+  margin: 0.18rem 0 0;
+  color: var(--foreground);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.vignetteFoot > svg {
+  color: var(--dayweft-evergreen);
+}
+
+.vignetteCaption {
+  margin: 1rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.helpSection,
+.storySection {
+  padding-block: clamp(4.5rem, 9vw, 8.5rem);
+  background: var(--background);
+}
+
+.sectionIntro,
+.storyIntro {
+  max-width: 43rem;
+  margin: 0 auto clamp(2.25rem, 4vw, 3.5rem);
+  text-align: center;
+}
+
+.sectionEyebrow {
+  color: var(--dayweft-evergreen);
+}
+
+.sectionIntro h2,
+.storyIntro h2,
+.trialInner h2 {
+  margin: 0.8rem 0 0.8rem;
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.65rem);
+  font-weight: 650;
+  letter-spacing: -0.06em;
+  line-height: 1.06;
+}
+
+.sectionIntro > p:last-child,
+.storyIntro > p:last-child {
+  max-width: 36rem;
+  margin: 0 auto;
+  color: var(--muted-foreground);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.featureGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1.1rem;
+}
+
+.featureCard {
+  min-height: 21rem;
+  border-color: var(--border);
+  border-radius: 1.45rem;
+  padding: clamp(1.25rem, 2.5vw, 1.8rem);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 16px 38px -34px rgb(24 54 96 / 36%);
+}
+
+.featureIcon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.95rem;
+  background: var(--background);
+  color: var(--primary);
+}
+
+.featureIcon svg {
+  display: block;
+}
+
+.featureVisual {
+  display: grid;
+  min-height: 7rem;
+  place-items: center start;
+  border-color: var(--border);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.featureWord {
+  color: var(--secondary-foreground);
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+
+.featureWord span {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.55rem;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  letter-spacing: 0;
+}
+
+.planWord {
+  color: var(--dayweft-evergreen);
+}
+
+.planWord span {
+  background: var(--dayweft-evergreen-soft);
+  color: var(--dayweft-evergreen);
+}
+
+.taskWord span {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.inlineOffer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: clamp(2rem, 4vw, 3.5rem);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: clamp(1.4rem, 3.6vw, 2.5rem);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.offerEyebrow {
+  color: var(--secondary-foreground);
+  font-size: 0.7rem;
+}
+
+.inlineOffer h3 {
+  margin: 0.55rem 0 0.35rem;
+  color: var(--secondary-foreground);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+}
+
+.inlineOffer > div > p:last-child {
+  margin: 0;
+  color: var(--secondary-foreground);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.offerCta {
+  flex: 0 0 auto;
+}
+
+.storySection {
+  padding-bottom: clamp(5rem, 10vw, 9rem);
+}
+
+.storyIntro {
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.storyStage {
+  display: grid;
+  width: 100%;
+}
+
+.storyPrimitive {
+  max-width: 100%;
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.terminalSurface {
+  border: 1px solid #d8e2f0;
+  border-radius: 1.35rem;
+  padding: 0.75rem;
+  background: #f2f6fd;
+  color: #17243a;
+}
+
+.terminalSurface :global([class$="__term"]) {
+  border-color: #d8e2f0 !important;
+  background: #f2f6fd !important;
+  color: #17243a !important;
+  box-shadow: 0 24px 48px -40px rgb(24 54 96 / 28%) !important;
+}
+
+.terminalSurface :global([class$="__term"] *) {
+  color: #17243a !important;
+}
+
+.storyFrame {
+  border: 1px solid var(--border);
+  border-radius: 1.6rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 24px 60px -46px rgb(24 54 96 / 34%);
+}
+
+.trialSection {
+  padding: clamp(4rem, 8vw, 7rem) 1.5rem;
+}
+
+.trialInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 49rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.trialEyebrow {
+  color: var(--muted-foreground);
+}
+
+.trialInner h2 {
+  max-width: 11ch;
+  margin-top: 1rem;
+  color: var(--foreground);
+  font-size: clamp(2.55rem, 5.5vw, 4.5rem);
+}
+
+.trialInner > p:not(.trialEyebrow) {
+  max-width: 38rem;
+  margin: 0 auto;
+  color: var(--muted-foreground);
+  font-size: 1.08rem;
+  line-height: 1.65;
+}
+
+.trialCta {
+  min-height: 3.25rem;
+  margin-top: 1.7rem;
+  padding-inline: 1.35rem;
+  font-size: 0.94rem;
+}
+
+.emailLink {
+  margin-top: 1rem;
+  color: var(--secondary-foreground);
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 0.22rem;
+}
+
+.footer {
+  border-top: 1px solid var(--border);
+  background: var(--background);
+}
+
+.footerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  width: min(100% - 3rem, 78rem);
+  min-height: 6rem;
+  margin-inline: auto;
+}
+
+.footerInner .wordmark {
+  font-size: 1rem;
+}
+
+.footerInner .mark {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.footerInner p,
+.footerInner > span {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.footerInner > a {
+  font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+  .headerInner {
+    grid-template-columns: auto 1fr auto;
+    gap: 1.2rem;
+  }
+
+  .nav {
+    gap: 1rem;
+  }
+
+  .nav a {
+    font-size: 0.79rem;
+  }
+
+  .headerCta {
+    padding-inline: 0.9rem;
+    font-size: 0.8rem;
+  }
+
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(19rem, 0.88fr);
+    gap: 2.2rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .container {
+    width: min(100% - 2.5rem, 34rem);
+  }
+
+  .headerInner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem 1rem;
+    width: calc(100% - 2.5rem);
+    min-height: 0;
+    padding-block: 0.8rem 0.72rem;
+  }
+
+  .wordmark {
+    font-size: 1.08rem;
+  }
+
+  .mark {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .headerCta {
+    min-height: 2.65rem;
+    padding: 0.58rem 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: space-between;
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  .nav a {
+    font-size: 0.73rem;
+    white-space: nowrap;
+  }
+
+  .heroFieldContent {
+    padding-block: 3.2rem 4.5rem;
+  }
+
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  .heroCopy h1 {
+    max-width: 11.5ch;
+    margin-top: 1.15rem;
+    font-size: clamp(2.85rem, 11vw, 4.2rem);
+    letter-spacing: -0.065em;
+  }
+
+  .heroText {
+    max-width: 34rem;
+    font-size: 1rem;
+  }
+
+  .heroActions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .primaryCta {
+    min-height: 3rem;
+    font-size: 0.88rem;
+  }
+
+  .mailNote {
+    max-width: 22rem;
+    font-size: 0.78rem;
+  }
+
+  .vignette {
+    width: 100%;
+    border-radius: 1.4rem;
+    padding: 1.15rem;
+  }
+
+  .vignetteTop {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .vignetteDate {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: -0.15rem;
+  }
+
+  .vignetteTop p {
+    font-size: 0.95rem;
+  }
+
+  .vignetteMark,
+  .footCheck {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .planNote {
+    margin-left: 0.55rem;
+  }
+
+  .taskNote {
+    margin-right: 0.55rem;
+  }
+
+  .helpSection,
+  .storySection {
+    padding-block: 4.75rem;
+  }
+
+  .sectionIntro,
+  .storyIntro {
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .sectionIntro h2,
+  .storyIntro h2 {
+    font-size: clamp(2.15rem, 8vw, 3.2rem);
+  }
+
+  .sectionIntro > p:last-child,
+  .storyIntro > p:last-child {
+    margin-left: 0;
+    font-size: 0.98rem;
+  }
+
+  .featureGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+  }
+
+  .featureCard {
+    min-height: auto;
+    padding: 1.25rem;
+  }
+
+  .featureVisual {
+    min-height: 5.5rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .inlineOffer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1.1rem;
+    margin-top: 1.5rem;
+    border-radius: 1.25rem;
+    padding: 1.35rem;
+  }
+
+  .offerCta {
+    min-height: 2.9rem;
+    font-size: 0.82rem;
+  }
+
+  .storyFrame {
+    border-radius: 1.25rem;
+    padding: 0.8rem;
+  }
+
+  .trialSection {
+    padding: 4.5rem 1.25rem;
+  }
+
+  .trialInner h2 {
+    font-size: clamp(2.55rem, 10vw, 3.6rem);
+  }
+
+  .trialInner > p:not(.trialEyebrow) {
+    font-size: 1rem;
+  }
+
+  .footerInner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.65rem 1rem;
+    width: calc(100% - 2.5rem);
+    padding-block: 1.15rem;
+  }
+
+  .footerInner .wordmark {
+    grid-column: 1;
+  }
+
+  .footerInner p {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .footerInner > a {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .footerInner > span {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    align-self: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .container,
+  .headerInner,
+  .footerInner {
+    width: calc(100% - 2rem);
+  }
+
+  .headerInner {
+    gap: 0.72rem 0.6rem;
+  }
+
+  .headerCta {
+    gap: 0.28rem;
+    padding-inline: 0.56rem;
+    font-size: 0.7rem;
+  }
+
+  .headerCta svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .nav {
+    gap: 0.35rem;
+  }
+
+  .nav a {
+    font-size: 0.68rem;
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .heroCopy h1 {
+    font-size: 2.72rem;
+  }
+
+  .vignetteTop {
+    grid-template-columns: 1.85rem minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .vignetteMark {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .note {
+    padding: 0.76rem 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav a,
+  .footerInner > a,
+  .headerCta,
+  .primaryCta,
+  .offerCta,
+  .trialCta,
+  .textLink {
+    transition: none;
+  }
+}

@@ -1,0 +1,2 @@
+/* @polsia:user-owned — shared app styles; font loading uses next/font in src/lib/fonts.ts. */
+@import "../components/custom/app-ui/app-ui.css" layer(components);

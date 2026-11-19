@@ -1,0 +1,995 @@
+/* @polsia:user-owned — CSS half of ConceptStory, ChaosToOrder, MatchPairs and FlowPaths.
+ * Server HTML is always the final, visible state: ConceptStory renders its static
+ * (stacked) layout until JS switches it to `data-mode="scrub"` after hydration, and the
+ * stage primitives render progress = 1 until then. Loops (alert pulse, hub ring) only
+ * run under `prefers-reduced-motion: no-preference`. Only opacity/transform animate. */
+
+@layer components {
+  /* ---------- Shared tone tokens (overridable through the `tones` prop) ---------- */
+
+  .tones {
+    --mk-accent: var(--primary);
+    --mk-ok: oklch(0.62 0.14 158);
+    --mk-alert: var(--destructive);
+    --mk-surface: var(--card);
+    --mk-ink: var(--card-foreground);
+    /* Secondary text: the theme's muted color pulled toward the ink, so meta/eyebrow
+     * text keeps 4.5:1 on tinted cards even when the theme's muted is borderline. */
+    --mk-muted: color-mix(in oklab, var(--muted-foreground) 75%, var(--foreground));
+    --mk-line: var(--border);
+    /* Text in a tone color (flags, labels): a derivative mixed toward the ink that
+     * reaches 4.5:1 for any tone, pastel or dark. The raw tones stay on fills/borders.
+     * Same formula as `readableText()` in contrast.ts. */
+    --mk-alert-text: color-mix(in oklab, var(--mk-alert) var(--mk-tone-mix, 40%), var(--mk-ink));
+    --mk-ok-text: color-mix(in oklab, var(--mk-ok) var(--mk-tone-mix, 40%), var(--mk-ink));
+    --mk-accent-text: color-mix(in oklab, var(--mk-accent) var(--mk-tone-mix, 40%), var(--mk-ink));
+    /* Solid accent surface that carries text (the FlowPaths hub) and its text color:
+     * mid-lightness accents are darkened to L 0.5 and the text flips to near-white or
+     * near-black, so it passes whatever --primary-foreground is set to. Same formulas
+     * as `solidFill()` / `textOnFill()` in contrast.ts. */
+    --mk-accent-fill: oklch(
+      from var(--mk-accent) calc(l - clamp(0, l - 0.5, 0.12) * clamp(0, (0.62 - l) * 1000, 1)) c h
+    );
+    --mk-on-accent: oklch(
+      from var(--mk-accent-fill) clamp(0.18, (0.56 - l) * 1000, 0.985) min(c, 0.03) h
+    );
+  }
+
+  /* ---------- ConceptStory ---------- */
+
+  .concept {
+    --mk-top: 4rem;
+    position: relative;
+    /* Chip / node z-indexes stay inside the story (never over a sticky navbar). */
+    isolation: isolate;
+    /* The gutter below compares the story's width (cqw) with the screen's (vw). */
+    container-type: inline-size;
+  }
+
+  .track {
+    position: relative;
+  }
+
+  /* Gutter: only what the parent doesn't already give. A full-bleed story gets the whole
+   * `--mk-story-gutter`; one inside a padded container (inset from the screen edge by at
+   * least that much) gets none, so a container never ends up with a double gutter. The
+   * layout is also capped to `--mk-story-max` and centered. Same in SSR and scrub modes. */
+  .viewport {
+    box-sizing: border-box;
+    display: grid;
+    width: 100%;
+    max-width: var(--mk-story-max, 80rem);
+    margin-inline: auto;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    padding-block: clamp(3rem, 8vw, 6rem);
+    padding-inline: max(
+      0px,
+      var(--mk-story-gutter, clamp(1.25rem, 5vw, 3rem)) -
+      (100vw - 100cqw) /
+      2
+    );
+  }
+
+  @media (min-width: 768px) {
+    .viewport {
+      grid-template-columns: minmax(0, 0.74fr) minmax(0, 1.26fr);
+      align-items: start;
+      gap: clamp(2.5rem, 5vw, 5rem);
+    }
+  }
+
+  .captionCol {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    min-width: 0;
+  }
+
+  .captions {
+    display: grid;
+    gap: 2.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .caption {
+    min-width: 0;
+  }
+
+  .captionEyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .indicator {
+    display: none;
+  }
+
+  .stage {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    align-items: center;
+  }
+
+  /* Every scene shares one grid cell, so the stage is as tall as its tallest scene.
+   * Scenes wrapped in an author element (<div> around them) stack in it the same way. */
+  .stage :has(> .scene) {
+    display: grid;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .scene {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .scene[data-static-hidden="true"] {
+    display: none;
+  }
+
+  /* Pinned, scroll-scrubbed layout (JS sets data-mode once motion is allowed). */
+  .concept[data-mode="scrub"] .track {
+    height: var(--mk-scroll-length, 420vh);
+  }
+
+  .concept[data-mode="scrub"] .viewport {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    padding-block: calc(var(--mk-top) + clamp(1rem, 4svh, 2.5rem)) clamp(1.25rem, 5svh, 3rem);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
+    gap: clamp(1rem, 3svh, 2rem);
+  }
+
+  @media (min-width: 768px) {
+    .concept[data-mode="scrub"] .viewport {
+      grid-template-rows: minmax(0, 1fr);
+      align-items: center;
+      gap: clamp(2.5rem, 5vw, 5rem);
+    }
+  }
+
+  /* layout="full": captions centered above a full-width stage. */
+  @media (min-width: 768px) {
+    .concept[data-layout="full"] .viewport {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .concept[data-layout="full"] .captionCol {
+      width: 100%;
+      max-width: 46rem;
+      margin-inline: auto;
+      text-align: center;
+    }
+
+    .concept[data-layout="full"] .captionEyebrow {
+      justify-content: center;
+    }
+
+    .concept[data-layout="full"] .caption > div {
+      margin-inline: auto;
+    }
+
+    .concept[data-layout="full"][data-mode="scrub"] .viewport {
+      grid-template-rows: auto minmax(0, 1fr);
+      align-items: stretch;
+      gap: clamp(1rem, 3svh, 2rem);
+    }
+  }
+
+  .concept[data-mode="scrub"] .captions {
+    gap: 0;
+  }
+
+  .concept[data-mode="scrub"] .caption {
+    grid-area: 1 / 1;
+  }
+
+  .concept[data-mode="scrub"] .indicator {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 0.5rem;
+  }
+
+  /* Labels sit on up to two lines above their tracks (never cut with an ellipsis);
+   * tracks stay on one baseline whatever the label lengths. */
+  .segment {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  /* The stage hugs its tallest scene (no full-height empty card), is centered in the
+   * pinned viewport and never paints outside it; scenes center in the shared cell. */
+  .concept[data-mode="scrub"] .stage {
+    grid-template-rows: minmax(0, 1fr);
+    align-self: center;
+    max-height: 100%;
+    min-height: 0;
+    overflow: clip;
+    overflow-clip-margin: 1.25rem;
+  }
+
+  .concept[data-mode="scrub"] .stage :has(> .scene) {
+    grid-template-rows: minmax(0, 1fr);
+    align-self: stretch;
+    min-height: 0;
+  }
+
+  /* A scene taller than the room left is scaled down to fit (ConceptScene measures it),
+   * so its top-aligned overflow (safe center) shrinks toward the top edge. */
+  .concept[data-mode="scrub"] .scene {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-self: stretch;
+    align-content: safe center;
+    min-height: 0;
+    transform-origin: 50% 0;
+  }
+
+  .concept[data-mode="scrub"] .captionEyebrow {
+    display: none;
+  }
+
+  .segmentLabel {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-bottom: 0.55rem;
+    color: var(--mk-muted);
+    font-size: 0.72rem;
+    font-weight: 560;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    text-transform: uppercase;
+    text-wrap: balance;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    transition: color 0.35s ease;
+  }
+
+  @media (max-width: 767px) {
+    .segmentLabel {
+      font-size: 0.64rem;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  .segment[data-active="true"] .segmentLabel {
+    color: var(--foreground);
+  }
+
+  .segmentTrack {
+    position: relative;
+    height: 2px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--foreground) 12%, transparent);
+  }
+
+  .segmentFill {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--mk-accent);
+    transform-origin: 0 50%;
+  }
+
+  /* ---------- ChaosToOrder ---------- */
+
+  /* The list is the scatter box: an aspect-ratio box (never a thin band) with the
+   * ordered grid centered in it. `aspectRatio="auto"` = as tall as the grid. */
+  .chaos {
+    --mk-cols: 4;
+    --mk-cols-mobile: 2;
+    --mk-chaos-ar: 16 / 10;
+    --mk-chaos-ar-mobile: 1 / 1;
+    --mk-chaos-gap: 0.5rem;
+    /* Chip width cap (set from the labels): columns never grow into long empty bars. */
+    --mk-chip-max: 16rem;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--mk-cols-mobile), minmax(0, var(--mk-chip-max)));
+    justify-content: center;
+    align-content: center;
+    gap: var(--mk-chaos-gap);
+    aspect-ratio: var(--mk-chaos-ar-mobile);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chaos[data-size="md"] {
+    --mk-chaos-gap: 0.625rem;
+  }
+
+  .chaos[data-size="lg"] {
+    --mk-chaos-gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .chaos {
+      --mk-chaos-gap: 0.625rem;
+      grid-template-columns: repeat(var(--mk-cols), minmax(0, var(--mk-chip-max)));
+      aspect-ratio: var(--mk-chaos-ar);
+    }
+
+    .chaos[data-size="md"] {
+      --mk-chaos-gap: 0.75rem;
+    }
+
+    .chaos[data-size="lg"] {
+      --mk-chaos-gap: 0.875rem;
+    }
+  }
+
+  /* Pinned: the box never outgrows the viewport (the grid still fits, it is centered). */
+  .concept[data-mode="scrub"] .chaos {
+    max-height: calc(100svh - var(--mk-top) - 7rem);
+  }
+
+  @media (max-width: 767px) {
+    .concept[data-mode="scrub"] .chaos {
+      max-height: 48svh;
+    }
+  }
+
+  .chip {
+    position: relative;
+    min-width: 0;
+    container-type: inline-size;
+    transform-origin: 50% 50%;
+  }
+
+  .chipFace {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.375rem;
+    padding-inline: 0.7rem 0.75rem;
+    border: 1px solid var(--mk-line);
+    border-radius: calc(var(--radius) + 2px);
+    background: var(--mk-surface);
+    color: var(--mk-ink);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .chipLift {
+    position: absolute;
+    inset: 0;
+    border-radius: calc(var(--radius) + 2px);
+    box-shadow: var(--shadow-lg);
+    pointer-events: none;
+  }
+
+  .chipTone {
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(var(--radius) + 3px);
+    pointer-events: none;
+  }
+
+  .chipToneAlert {
+    border: 1px solid color-mix(in oklch, var(--mk-alert) 55%, transparent);
+    background: color-mix(in oklch, var(--mk-alert) 7%, transparent);
+    box-shadow:
+      0 0 0 4px color-mix(in oklch, var(--mk-alert) 10%, transparent),
+      0 6px 22px -6px color-mix(in oklch, var(--mk-alert) 45%, transparent);
+  }
+
+  .chipToneOk {
+    border: 1px solid color-mix(in oklch, var(--mk-ok) 45%, transparent);
+    background: color-mix(in oklch, var(--mk-ok) 7%, transparent);
+  }
+
+  .chipIcon {
+    position: relative;
+    display: grid;
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    place-items: center;
+  }
+
+  .chipIcon > * {
+    grid-area: 1 / 1;
+  }
+
+  .dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--mk-ink) 28%, transparent);
+  }
+
+  .dotAlert {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--mk-alert);
+  }
+
+  .dotAlert::after {
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: color-mix(in oklch, var(--mk-alert) 35%, transparent);
+    content: "";
+    opacity: 0;
+  }
+
+  .check {
+    display: grid;
+    width: 1rem;
+    height: 1rem;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--mk-ok);
+    color: #fff;
+  }
+
+  /* The label keeps its room; the meta shrinks first, and hides in narrow chips. */
+  .chipLabel {
+    flex: 0 1 auto;
+    min-width: min(100%, 4.5rem);
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 540;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chipMeta {
+    flex: 0 1000 auto;
+    min-width: 0;
+    margin-inline-start: auto;
+    overflow: hidden;
+    color: var(--mk-muted);
+    text-overflow: ellipsis;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* Chip sizes: `lg` for a few items, `md` for a dozen, `sm` for dense sets. */
+  .chaos[data-size="md"] .chipFace {
+    gap: 0.55rem;
+    height: 2.75rem;
+    padding-inline: 0.8rem 0.9rem;
+  }
+
+  .chaos[data-size="md"] .chipLabel {
+    font-size: 0.875rem;
+  }
+
+  .chaos[data-size="md"] .chipMeta {
+    font-size: 0.75rem;
+  }
+
+  .chaos[data-size="lg"] .chipFace {
+    gap: 0.625rem;
+    height: 3.125rem;
+    padding-inline: 0.95rem 1.05rem;
+    border-radius: calc(var(--radius) + 5px);
+  }
+
+  .chaos[data-size="lg"] .chipLift,
+  .chaos[data-size="lg"] .chipTone {
+    border-radius: calc(var(--radius) + 5px);
+  }
+
+  .chaos[data-size="lg"] .chipLabel {
+    font-size: 0.9375rem;
+  }
+
+  .chaos[data-size="lg"] .chipMeta {
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 767px) {
+    .chipFace,
+    .chaos[data-size] .chipFace {
+      gap: 0.375rem;
+      height: 2rem;
+      padding-inline: 0.5rem 0.55rem;
+    }
+
+    .chaos[data-size="md"] .chipFace {
+      height: 2.25rem;
+      padding-inline: 0.6rem 0.65rem;
+    }
+
+    .chaos[data-size="lg"] .chipFace {
+      height: 2.5rem;
+      padding-inline: 0.7rem 0.75rem;
+    }
+
+    .chipLabel,
+    .chaos[data-size] .chipLabel {
+      font-size: 0.72rem;
+    }
+
+    .chaos[data-size="md"] .chipLabel {
+      font-size: 0.78rem;
+    }
+
+    .chaos[data-size="lg"] .chipLabel {
+      font-size: 0.84rem;
+    }
+
+    .chipMeta,
+    .chaos[data-size] .chipMeta {
+      display: none;
+    }
+  }
+
+  @container (max-width: 12rem) {
+    .chipMeta {
+      display: none;
+    }
+  }
+
+  /* Box width: a chip whose column is too narrow for its size renders one step smaller
+   * (each chip is its own container, so this follows the real column width). */
+  @media (min-width: 768px) {
+    @container (max-width: 12.5rem) {
+      .chaos[data-size="lg"] .chipFace {
+        gap: 0.55rem;
+        height: 2.75rem;
+        padding-inline: 0.8rem 0.9rem;
+      }
+
+      .chaos[data-size="lg"] .chipLabel {
+        font-size: 0.875rem;
+      }
+    }
+
+    @container (max-width: 10rem) {
+      .chaos[data-size] .chipFace {
+        gap: 0.5rem;
+        height: 2.375rem;
+        padding-inline: 0.7rem 0.75rem;
+      }
+
+      .chaos[data-size] .chipLabel {
+        font-size: 0.8125rem;
+      }
+    }
+  }
+
+  /* ---------- MatchPairs ---------- */
+
+  .match {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(2.25rem, 14%, 9rem) minmax(0, 1fr);
+    row-gap: 0.9rem;
+  }
+
+  @media (max-width: 767px) {
+    .match {
+      grid-template-columns: minmax(0, 1fr) 2.75rem minmax(0, 1fr);
+    }
+
+    .cardFace {
+      min-height: 2.875rem;
+      padding: 0.45rem 0.6rem;
+    }
+
+    .cardLabel {
+      font-size: 0.75rem;
+    }
+
+    .cardMeta {
+      font-size: 0.66rem;
+    }
+  }
+
+  .matchTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--mk-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .matchTitle::before {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 2px;
+    background: color-mix(in oklch, var(--mk-ink) 30%, transparent);
+    content: "";
+  }
+
+  .matchList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .matchLeft {
+    grid-column: 1;
+  }
+
+  .matchRight {
+    grid-column: 3;
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+  }
+
+  .cardFace {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 3.25rem;
+    overflow: hidden;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--mk-line);
+    border-radius: calc(var(--radius) + 2px);
+    background: var(--mk-surface);
+    color: var(--mk-ink);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .cardLabel {
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 560;
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cardMeta {
+    overflow: hidden;
+    color: var(--mk-muted);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cardTone {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .cardOk {
+    border: 1px solid color-mix(in oklch, var(--mk-ok) 50%, transparent);
+    background: color-mix(in oklch, var(--mk-ok) 6%, transparent);
+  }
+
+  .cardAlert {
+    border: 1px dashed color-mix(in oklch, var(--mk-alert) 60%, transparent);
+    background: color-mix(in oklch, var(--mk-alert) 5%, transparent);
+  }
+
+  .shimmer {
+    position: absolute;
+    inset: 0;
+    width: 55%;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      color-mix(in oklch, var(--mk-ok) 0%, transparent) 20%,
+      color-mix(in oklch, #fff 55%, var(--mk-ok) 10%) 50%,
+      transparent 80%
+    );
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+  }
+
+  .flag {
+    position: absolute;
+    top: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--mk-alert) 12%, var(--mk-surface));
+    color: var(--mk-alert-text);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    translate: 0 -50%;
+  }
+
+  .flagLeft,
+  .flagRight {
+    right: 0.6rem;
+  }
+
+  .badge {
+    position: absolute;
+    display: grid;
+    width: 1.375rem;
+    height: 1.375rem;
+    margin: -0.6875rem 0 0 -0.6875rem;
+    place-items: center;
+    border-radius: 999px;
+    z-index: 2;
+    background: var(--mk-ok);
+    color: #fff;
+    box-shadow:
+      0 0 0 3px var(--background),
+      0 6px 16px -4px color-mix(in oklch, var(--mk-ok) 60%, transparent);
+    pointer-events: none;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  /* ---------- FlowPaths ---------- */
+
+  .flow {
+    --mk-ar: 16 / 9;
+    --mk-ar-mobile: 4 / 5;
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--mk-ar);
+  }
+
+  /* Undrawn edge guide: derived from the text color, so it reads on any stage. */
+  .flowGuide {
+    stroke: color-mix(in oklch, currentColor 30%, transparent);
+  }
+
+  .flowNode {
+    position: absolute;
+    left: calc(var(--mk-x) * 1%);
+    top: calc(var(--mk-y) * 1%);
+    z-index: 1;
+    translate: -50% -50%;
+  }
+
+  .hOnly {
+    display: block;
+  }
+
+  .vOnly {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .flow[data-transpose="true"] {
+      aspect-ratio: var(--mk-ar-mobile);
+    }
+
+    .flow[data-transpose="true"] .flowNode {
+      left: calc(var(--mk-y) * 1%);
+      top: calc(var(--mk-x) * 1%);
+    }
+
+    .flow[data-transpose="true"] .hOnly {
+      display: none;
+    }
+
+    .flow[data-transpose="true"] .vOnly {
+      display: block;
+    }
+  }
+
+  .node {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 14rem;
+    padding: 0.45rem 0.8rem 0.45rem 0.6rem;
+    border: 1px solid var(--mk-line);
+    border-radius: 999px;
+    background: var(--mk-surface);
+    color: var(--mk-ink);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+
+  .nodeText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  .nodeLabel {
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 580;
+    letter-spacing: -0.005em;
+    text-overflow: ellipsis;
+  }
+
+  .nodeSub {
+    overflow: hidden;
+    color: var(--mk-muted);
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+  }
+
+  .nodeGlyph {
+    display: grid;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    place-items: center;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--mk-ink) 7%, transparent);
+  }
+
+  .nodeGlyph::before {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--mk-ink) 45%, transparent);
+    content: "";
+  }
+
+  .node[data-variant="hub"] {
+    max-width: 19rem;
+    gap: 0.6rem;
+    padding: 0.7rem 1.1rem 0.7rem 0.75rem;
+    border-color: transparent;
+    background: var(--mk-accent-fill);
+    color: var(--mk-on-accent);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .node[data-variant="hub"] .nodeLabel {
+    font-size: 0.9rem;
+  }
+
+  .node[data-variant="hub"] .nodeSub {
+    color: var(--mk-on-accent);
+  }
+
+  .node[data-variant="hub"] .nodeGlyph {
+    width: 1.6rem;
+    height: 1.6rem;
+    background: color-mix(in oklch, var(--mk-on-accent) 16%, transparent);
+  }
+
+  .node[data-variant="hub"] .nodeGlyph::before {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 2px;
+    background: var(--mk-on-accent);
+    rotate: 45deg;
+  }
+
+  .node[data-variant="output"] .nodeGlyph {
+    background: color-mix(in oklch, var(--mk-ok) 16%, transparent);
+  }
+
+  .node[data-variant="output"] .nodeGlyph::before {
+    background: var(--mk-ok);
+  }
+
+  @media (max-width: 767px) {
+    .node {
+      gap: 0.4rem;
+      max-width: 9.5rem;
+      padding: 0.35rem 0.6rem 0.35rem 0.4rem;
+    }
+
+    .nodeLabel {
+      font-size: 0.72rem;
+    }
+
+    .nodeSub {
+      display: none;
+    }
+
+    .nodeGlyph {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .node[data-variant="hub"] {
+      max-width: 15rem;
+      padding: 0.55rem 0.85rem 0.55rem 0.55rem;
+    }
+
+    .node[data-variant="hub"] .nodeLabel {
+      font-size: 0.8rem;
+    }
+
+    .node[data-variant="hub"] .nodeSub {
+      display: block;
+    }
+
+    .node[data-variant="hub"] .nodeGlyph {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+  }
+
+  .hubRing {
+    position: absolute;
+    inset: -6px;
+    border: 1px solid color-mix(in oklch, var(--mk-accent) 40%, transparent);
+    border-radius: 999px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ---------- Loops (only when motion is allowed) ---------- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dotAlert::after {
+      animation: mk-concept-pulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+
+    .hubRing[data-live="true"] {
+      animation: mk-concept-ring 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+  }
+
+  @keyframes mk-concept-pulse {
+    0% {
+      opacity: 0.9;
+      transform: scale(0.6);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.9);
+    }
+  }
+
+  @keyframes mk-concept-ring {
+    0% {
+      opacity: 0.8;
+      transform: scale(0.96);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.12, 1.35);
+    }
+  }
+
+  /* A scene's content keeps its natural height: an `overflow: hidden` child (a
+   * SchematicFrame) would otherwise be squeezed to the stage height and cut its own
+   * last rows. The scene is then taller than its cell and ConceptScene scales it to fit.
+   * (Last in the file: the most specific `> *` rule, after every lower one.) */
+  .concept[data-mode="scrub"] .scene > * {
+    min-height: max-content;
+  }
+}
